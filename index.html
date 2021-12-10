@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html >
+<head>
+  <meta charset="UTF-8">
+	<link rel="icon" href="./favicon.ico" type="image/x-icon">
+	<link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
+    <meta name="description" content="Over to you, Jeff!">
+    <meta name="author" content="Wumpcast Channel">
+    <meta property="og:title" name="Title" content="Wumpcast Channel"/>
+    <meta property="og:description" name="Description"
+          content="Unfortunately, we don't have a weather lady in this.  Pls dont sue."/>
+    <meta property="og:image" name="Image" content="https://i.imgur.com/EmAUqPO.png"/>
+    <meta property="og:url" name="URL" content="https://clubwumpus.github.io/wumpcast/"/>
+	<title>Wumpcast Channel</title>
+      <link rel="stylesheet" href="style.css">
+<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+	<script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script>if (window.module) module = window.module;</script>
+</head>
+<script>
+var clicka = polyAudio("snd/click.mp3", 10);
+var hover = polyAudio("snd/hover.mp3", 5);
+
+function doExit() { clicka.play(); window.location.href = 'https://clubwumpus.github.io/wumpmenu/'; };
+
+function polyAudio(path, copies) {
+  var elems = [], index = 0
+  for (var i = 0; i < 16; i++) elems.push(new Audio(path))
+  return {
+    play: function() {
+      if (window.chrome) elems[index].load()
+      elems[index].play()
+      index = (index + 1) % copies
+    }
+  }
+}
+
+function audioFade() {
+    var backgroundAudio=document.getElementById("bgm");
+	backgroundAudio.volume = 0;
+	$(backgroundAudio).animate({volume: 0.75}, 1500);
+	backgroundAudio.setAttribute("oncanplay", "#");
+}
+
+$(document).ready(function() {
+	loadWeather('Chicago, IL','');
+});
+
+function zipLookup() {
+var zip = document.getElementById("zip").value;
+loadWeather(zip,'');
+}
+
+function loadWeather(location, woeid) {
+  $.simpleWeather({
+    location: location,
+    woeid: woeid,
+    unit: 'f',
+    success: function(weather) {
+      html = '<p class="big">'+weather.temp+'&deg;'+weather.units.temp+'</p><br><p class="smol">' + weather.currently + '</p>';
+		document.getElementById("tempImg").style.backgroundImage = "url('img/icons/" + weather.code + ".png')"
+		$("#currentTown").html(weather.city);
+		$("#temperature").html(html);
+    },
+  });
+}
+
+function toggleGlobe() {
+	clicka.play();
+	$( ".button" ).toggleClass( "opaque" );
+	$( "#weatherSpace" ).toggleClass( "hidden" );
+}
+
+</script>
+<body>
+
+<div id="menu" class="menu">
+<div id="weatherSpace">
+<div id="greenbar">
+	<input type="text" id="zip" value="" placeholder="Enter a town name..." onmouseenter="hover.play();" onclick="this.select()" onkeydown = "if (event.keyCode == 13) zipLookup();">
+	<div id="currentTown"></div>
+</div>
+<div id="temperature"></div>
+<div id="tempImg"></div>
+</div>
+	<div id="webgl"></div>
+<div class="button footer opaque"></div>
+<div class="button right opaque" onclick="toggleGlobe();" onmouseenter="hover.play();"><span>Globe</span></div>
+<div class="button opaque" onclick="doExit();" onmouseenter="hover.play();"><span>Wump Menu</span></div>
+</div>
+</body>
+<audio id="bgm" src="snd/bgm.mp3" loop=1 auto autoplay oncanplay="audioFade()"></audio>
+<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
+	<script src="js/three.min.js"></script>
+	<script src="js/Detector.js"></script>		
+	<script src="js/TrackballControls.js"></script>		
+	<script src="js/earth.js"></script>  
+	<script src="js/simpleWeather.min.js"></script>  
+<script>if (window.module) module = window.module;</script>
+</html>
