@@ -58,10 +58,18 @@
 	}
 
 	function createSphere(radius, segments) {
-		return new THREE.ColladaLoader().load("/model/earth.dae", function (result) {
-			// adding the child that I want to the scene
+		const loadingManager = new THREE.LoadingManager(function () {
+			scene.add(elf);
+		});
+
+		// collada
+
+		const loader = new ColladaLoader(loadingManager);
+		loader.load('/model/earth.dae', function (collada) {
 			scene.add(result.scene.children[2]);
 		});
+
+		return loader;
 	}
 
 	function createClouds(radius, segments) {
