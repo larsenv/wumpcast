@@ -3,6 +3,8 @@
 
 	var webglEl = document.getElementById('webgl');
 
+	import { ColladaLoader } from './ColladaLoader.js';
+
 	if (!Detector.webgl) {
 		Detector.addGetWebGLMessage(webglEl);
 		return;
