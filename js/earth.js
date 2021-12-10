@@ -1,9 +1,9 @@
+import { ColladaLoader } from './ColladaLoader.js';
+
 // Created by Bjorn Sandvik - thematicmapping.org
 (function () {
 
 	var webglEl = document.getElementById('webgl');
-
-	import { ColladaLoader } from './ColladaLoader.js';
 
 	if (!Detector.webgl) {
 		Detector.addGetWebGLMessage(webglEl);
