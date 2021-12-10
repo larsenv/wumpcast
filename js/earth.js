@@ -58,12 +58,10 @@
 	}
 
 	function createSphere(radius, segments) {
-		return new THREE.Mesh(
-			new THREE.SphereGeometry(radius, segments, segments),
-			new THREE.MeshPhongMaterial({
-				map:         THREE.ImageUtils.loadTexture('img/2_no_clouds_4k.jpg')	
-			})
-		);
+		return new THREE.ColladaLoader().load("/model/earth.dae", function (result) {
+			// adding the child that I want to the scene
+			scene.add(result.scene.children[2]);
+		});
 	}
 
 	function createClouds(radius, segments) {
