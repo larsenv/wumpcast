@@ -1,101 +1,125 @@
 <!DOCTYPE html>
-<html >
+<html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-	<link rel="icon" href="./favicon.ico" type="image/x-icon">
-	<link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
-    <meta name="description" content="Over to you, Jeff!">
-    <meta name="author" content="Wumpcast Channel">
-    <meta property="og:title" name="Title" content="Wumpcast Channel"/>
-    <meta property="og:description" name="Description"
-          content="Unfortunately, we don't have a weather lady in this.  Pls dont sue."/>
-    <meta property="og:image" name="Image" content="https://i.imgur.com/EmAUqPO.png"/>
-    <meta property="og:url" name="URL" content="https://clubwumpus.github.io/wumpcast/"/>
-	<title>Wumpcast Channel</title>
-      <link rel="stylesheet" href="style.css">
-<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
-	<script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
-<script>if (window.module) module = window.module;</script>
+  <title>three.js webgl - collada</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <link type="text/css" rel="stylesheet" href="main.css">
 </head>
-<script>
-var clicka = polyAudio("snd/click.mp3", 10);
-var hover = polyAudio("snd/hover.mp3", 5);
 
-function doExit() { clicka.play(); window.location.href = 'https://clubwumpus.github.io/wumpmenu/'; };
-
-function polyAudio(path, copies) {
-  var elems = [], index = 0
-  for (var i = 0; i < 16; i++) elems.push(new Audio(path))
-  return {
-    play: function() {
-      if (window.chrome) elems[index].load()
-      elems[index].play()
-      index = (index + 1) % copies
-    }
-  }
-}
-
-function audioFade() {
-    var backgroundAudio=document.getElementById("bgm");
-	backgroundAudio.volume = 0;
-	$(backgroundAudio).animate({volume: 0.75}, 1500);
-	backgroundAudio.setAttribute("oncanplay", "#");
-}
-
-$(document).ready(function() {
-	loadWeather('Chicago, IL','');
-});
-
-function zipLookup() {
-var zip = document.getElementById("zip").value;
-loadWeather(zip,'');
-}
-
-function loadWeather(location, woeid) {
-  $.simpleWeather({
-    location: location,
-    woeid: woeid,
-    unit: 'f',
-    success: function(weather) {
-      html = '<p class="big">'+weather.temp+'&deg;'+weather.units.temp+'</p><br><p class="smol">' + weather.currently + '</p>';
-		document.getElementById("tempImg").style.backgroundImage = "url('img/icons/" + weather.code + ".png')"
-		$("#currentTown").html(weather.city);
-		$("#temperature").html(html);
-    },
-  });
-}
-
-function toggleGlobe() {
-	clicka.play();
-	$( ".button" ).toggleClass( "opaque" );
-	$( "#weatherSpace" ).toggleClass( "hidden" );
-}
-
-</script>
 <body>
 
-<div id="menu" class="menu">
-<div id="weatherSpace">
-<div id="greenbar">
-	<input type="text" id="zip" value="" placeholder="Enter a town name..." onmouseenter="hover.play();" onclick="this.select()" onkeydown = "if (event.keyCode == 13) zipLookup();">
-	<div id="currentTown"></div>
-</div>
-<div id="temperature"></div>
-<div id="tempImg"></div>
-</div>
-	<div id="webgl"></div>
-<div class="button footer opaque"></div>
-<div class="button right opaque" onclick="toggleGlobe();" onmouseenter="hover.play();"><span>Globe</span></div>
-<div class="button opaque" onclick="doExit();" onmouseenter="hover.play();"><span>Wump Menu</span></div>
-</div>
+  <div id="container"></div>
+  <div id="info">
+    <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> collada loader<br />
+    Elf Girl by <a href="https://sketchfab.com/yellow09" target="_blank" rel="noopener">halloween</a>, <a
+      href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC Attribution</a>
+  </div>
+
+  <script type="module">
+
+    import * as THREE from './js/three.module.js';
+
+    import Stats from './js/stats.module.js';
+
+    import { ColladaLoader } from './js/ColladaLoader.js';
+
+    let container, stats, clock;
+    let camera, scene, renderer, elf;
+
+    init();
+    animate();
+
+    function init() {
+
+      container = document.getElementById('container');
+
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 2000);
+      camera.position.set(8, 10, 8);
+      camera.lookAt(0, 3, 0);
+
+      scene = new THREE.Scene();
+
+      clock = new THREE.Clock();
+
+      // loading manager
+
+      const loadingManager = new THREE.LoadingManager(function () {
+
+        scene.add(elf);
+
+      });
+
+      // collada
+
+      const loader = new ColladaLoader(loadingManager);
+      loader.load('./model/earth.dae', function (collada) {
+
+        elf = collada.scene;
+
+      });
+
+      //
+
+      const ambientLight = new THREE.AmbientLight(0xcccccc, 0.4);
+      scene.add(ambientLight);
+
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      directionalLight.position.set(1, 1, 0).normalize();
+      scene.add(directionalLight);
+
+      //
+
+      renderer = new THREE.WebGLRenderer();
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      container.appendChild(renderer.domElement);
+
+      //
+
+      stats = new Stats();
+      container.appendChild(stats.dom);
+
+      //
+
+      window.addEventListener('resize', onWindowResize);
+
+    }
+
+    function onWindowResize() {
+
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+    }
+
+    function animate() {
+
+      requestAnimationFrame(animate);
+
+      render();
+      stats.update();
+
+    }
+
+    function render() {
+
+      const delta = clock.getDelta();
+
+      if (elf !== undefined) {
+
+        elf.rotation.z += delta * 0.5;
+
+      }
+
+      renderer.render(scene, camera);
+
+    }
+
+  </script>
 </body>
-<audio id="bgm" src="snd/bgm.mp3" loop=1 auto autoplay oncanplay="audioFade()"></audio>
-<script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
-	<script src="js/three.min.js"></script>
-	<script src="js/Detector.js"></script>		
-	<script src="js/TrackballControls.js"></script>		
-	<script src="js/earth.js" type="module"></script>  
-	<script src="js/simpleWeather.min.js"></script>  
-	<script src="js/ColladaLoader.js" type="module"></script> 
-<script>if (window.module) module = window.module;</script>
+
 </html>
